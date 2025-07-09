@@ -29,8 +29,11 @@ def main():
         default=[],
         help="Relative paths to leave untouched",
     )
-    sub.add_parser("watch", help="Run watcher manually (not implemented)")
-    sub.add_parser("install-autostart", help="Install autostart (not implemented)")
+    sub.add_parser("watch", help="Run watcher manually for all tracked folders")
+    sub.add_parser(
+        "install-autostart",
+        help="Install autostart task so watcher runs on login/boot",
+    )
 
     args = parser.parse_args()
     if args.command == "track":
@@ -70,10 +73,39 @@ def main():
             parser.error(str(e))
         jump_back(secs, args.keep)
 
-    elif args.command in ("watch", "install-autostart"):
-        parser.error(f"Command '{args.command}' is not yet implemented.")
+    elif args.command == "watch":
+        import sys, time
+        from .config import load_tracked
+        from .store import MirrorStore
+        from .watcher import MirrorEventHandler
+        from watchdog.observers import Observer
+
+        bases = load_tracked()
+        if not bases:
+            print("No tracked folders configured. Use 'track' first.")
+            sys.exit(1)
+
+        store = MirrorStore()
+        observer = Observer()
+        for base in bases:
+            handler = MirrorEventHandler(store, base)
+            observer.schedule(handler, base, recursive=True)
+            print(f"Watching: {base}")
+        observer.start()
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            observer.stop()
+        observer.join()
+
+    elif args.command == "install-autostart":
+        from .autostart import install_autostart
+
+        install_autostart()
+
     else:
-        parser.print_help()
+        parser.error(f"Command '{args.command}' is not yet implemented.")
 
 
 if __name__ == "__main__":
