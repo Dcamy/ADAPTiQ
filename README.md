@@ -19,7 +19,7 @@ Just your code, as it was, before you (or your AI) broke it.
 - 🔐 **Safe by default**: `.git`, `.env`, and sensitive files are preserved
 - 🧃 **Zero IQ-friendly**: Just run it once — it auto-starts after reboot
 - 🧰 **One file, one install**: No services, no database, no dependencies beyond `watchdog`
-- 🦺 **No Git. Ever.**: That’s not a limitation. That’s the point.
+- 🦺 **No Git. Ever. Lost.**: That’s the point.
 
 ---
 
