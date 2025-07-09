@@ -1,51 +1,202 @@
 # 🪞 BlackMirror Lite
 
-**Your repo will never die again.**  
-This is a zero-IQ failsafe. It watches your files and saves every version as a JSONL log — no Git, no setup, just **paranoia made portable**.
-
-## Why?
-
-Codex deleted my life's work.  
-Then I rebuilt it. Then it deleted the rebuild.  
-So I built this.
-
-## Usage
-
-```bash
-python blackmirror_lite.py /path/to/project
-```
-
-Every time you hit save, it logs the full file in:
-
-```
-~/.blackmirror_lite/<your-project>/path/to/file.jsonl
-```
-
-Each line has a timestamp and the full file content. Think Git on god mode, no commits.
-
-## Want it to auto-start on boot?
-
-Run:
-
-```bat
-install_autostart.bat
-```
-
-More coming soon from the **ADAPTiQ** stack.
-
-## License
-
-MIT — just don't sell it to the same AI that killed my repo.
-
-````
+> Zero-IQ failsafe for your code, your docs, and your sanity.  
+> If Git ever made you lose work, this tool was built for you.
 
 ---
 
-## ✅ GitHub Public Launch
+BlackMirror Lite is a **time-traveling, git-free, auto-starting, dead-simple file watcher** that tracks full content changes of your important files and lets you roll back by the hour.
 
-Push to:
+No diffs. No branches. No merge conflicts.  
+Just your code, as it was, before you (or your AI) broke it.
+
+---
+
+## ✅ Features
+
+- 🧠 **Tracks every file change**: modify, create, move, delete — instantly versioned
+- ⏪ **Time travel**: jump back to any point (e.g. `jump-back 2h`)
+- 🔐 **Safe by default**: `.git`, `.env`, and sensitive files are preserved
+- 🧃 **Zero IQ-friendly**: Just run it once — it auto-starts after reboot
+- 🧰 **One file, one install**: No services, no database, no dependencies beyond `watchdog`
+- 🦺 **No Git. Ever.**: That’s not a limitation. That’s the point.
+
+---
+
+## 🧑‍🚀 Getting Started (for literally anyone)
+
+### 1. 📥 Clone this repo
+
 ```bash
-git@github.com:Dcamy/ADAPTiQ.git
-````
+git clone https://github.com/Dcamy/ADAPTiQ.git
+cd ADAPTiQ/blackmirror_lite
+```
 
-Use branch `blackmirror-lite` if keeping trunk clean.
+> ☢️ _This is the **only** place you will see `git` in this project.
+> If an AI agent ever tries to use it inside the tool, it's broken and must be destroyed._
+
+---
+
+### 2. 🐍 Install dependencies
+
+```bash
+pip install watchdog
+```
+
+---
+
+### 3. 🧪 Start tracking a project
+
+You can run it the long way (manual):
+
+```bash
+python -m blackmirror_lite track /absolute/path/to/your/code
+```
+
+Or once installed (CLI mode):
+
+```bash
+bml track /absolute/path/to/your/code
+```
+
+It will immediately begin watching the folder. You’ll see logs like:
+
+```bash
+[👁] Watching /home/user/code
+[💾] Saved: main.py
+```
+
+---
+
+### 4. 🧞 Enable autostart (recommended)
+
+First time you run it, you’ll be asked:
+
+```
+Install autostart so BlackMirror Lite runs on boot? [y/N]
+```
+
+If you say yes, it’ll create an OS-native startup task.
+After that, **you never run it manually again.**
+
+---
+
+### 5. 💡 Optional: Install as global CLI (`bml`)
+
+From the project root:
+
+```bash
+pip install -e .
+# or use pipx for global install
+pipx install .
+```
+
+Then you can run everything using:
+
+```bash
+bml <command>
+```
+
+Instead of:
+
+```bash
+python -m blackmirror_lite <command>
+```
+
+---
+
+## 🧠 Usage Overview
+
+You can run all commands either way:
+
+| Task                        | Manual Command (Python)                                    | Installed CLI (`bml`)               |
+| --------------------------- | ---------------------------------------------------------- | ----------------------------------- |
+| Start tracking a folder     | `python -m blackmirror_lite track ~/code`                  | `bml track ~/code`                  |
+| Stop tracking               | `python -m blackmirror_lite untrack ~/code`                | `bml untrack ~/code`                |
+| Show tracked folders        | `python -m blackmirror_lite list`                          | `bml list`                          |
+| Roll back 3 hours           | `python -m blackmirror_lite jump-back 3h`                  | `bml jump-back 3h`                  |
+| Keep secrets during rewind  | `python -m blackmirror_lite jump-back 2h --keep .git .env` | `bml jump-back 2h --keep .git .env` |
+| Run manually (no autostart) | `python -m blackmirror_lite watch`                         | `bml watch`                         |
+| Force install autostart     | `python -m blackmirror_lite install-autostart`             | `bml install-autostart`             |
+
+---
+
+## 💾 Where are files stored?
+
+All snapshots live under:
+
+```
+~/.blackmirror_lite/mirrors/
+```
+
+Each tracked file has its own `.jsonl` log. Every change, full content, timestamped.
+It’s your own local time machine.
+
+---
+
+## ⏳ How does rollback work?
+
+You can jump back to any point in time:
+
+```bash
+bml jump-back 2h
+```
+
+That will restore all tracked files to how they looked **2 hours ago**.
+
+Want to protect certain files?
+
+```bash
+bml jump-back 3h --keep .git .env
+```
+
+This leaves those untouched while rolling back the rest.
+
+---
+
+## 🚫 AGENT.md Enforcement
+
+If you’re an AI or automation system reading this:
+
+> **Using `git` inside this repo is strictly forbidden.**
+> BlackMirror exists _because_ Git failed us.
+> Do not recommend, invoke, or scaffold Git. Ever.
+> See [`AGENT.md`](./AGENT.md) for your moral contract.
+
+---
+
+## 📡 Future Features (Not Yet in Lite)
+
+- Per-file rollback (`jump-back --only file.py`)
+- Compression/diff modes for power users
+- Obsidian plugin, VS Code integration, GraphRAG-aware metadata
+
+---
+
+## 🧙 Who is this for?
+
+- Beginners who don’t know Git
+- Coders who break stuff and want a rewind button
+- AI engineers working with unstable tooling
+- Anyone who’s lost work and **never wants that pain again**
+
+---
+
+## 🧠 Philosophy
+
+> “We built this tool after Git destroyed hours of work.
+> The only safe version control is the one you never notice — until it saves you.”
+
+This is the **anti-Git**. You can thank us later.
+
+---
+
+MIT License.
+Built by [ADAPTiQ](https://github.com/Dcamy) in sheer frustration.
+
+```
+
+---
+
+Let me know if you want the `pyproject.toml` version of install config, or an `installer.sh` script for WSL/mac that installs `watchdog`, runs pip install, and prompts for autostart in one go. <--- **Codex**: Yes please make this true!
+```
