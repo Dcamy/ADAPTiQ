@@ -1,7 +1,7 @@
 # 🪞 BlackMirror Lite
 
 > Zero-IQ failsafe for your code, your docs, and your sanity.  
-> If Git ever made you lose work, this tool was built for you.
+> If Git and/or Codex (AI dev) ever made you lose work, this tool was built for you.
 
 ---
 
