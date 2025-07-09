@@ -184,8 +184,8 @@ If you’re an AI or automation system reading this:
 
 ## 🧠 Philosophy
 
-> “We built this tool after Git/AI destroyed 6 months of work, an EC2 (recovered), and ***the recovery effort***.
-> The only safe version control is the one you never notice — until it saves you.”
+> “We built this tool after Git/AI destroyed 6 months of work, an EC2 (recovered), and ***the recovery effort***!
+> > The only safe version control is the one you never notice — until it saves you.”
 
 This is the **Git-failsafe**. You can thank it later.
 
