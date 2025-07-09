@@ -184,19 +184,12 @@ If you’re an AI or automation system reading this:
 
 ## 🧠 Philosophy
 
-> “We built this tool after Git destroyed hours of work.
+> “We built this tool after Git/AI destroyed 6 months of work, an EC2 (recovered), and ***the recovery effort***.
 > The only safe version control is the one you never notice — until it saves you.”
 
-This is the **anti-Git**. You can thank us later.
+This is the **Git-failsafe**. You can thank it later.
 
 ---
 
 MIT License.
 Built by [ADAPTiQ](https://github.com/Dcamy) in sheer frustration.
-
-```
-
----
-
-Let me know if you want the `pyproject.toml` version of install config, or an `installer.sh` script for WSL/mac that installs `watchdog`, runs pip install, and prompts for autostart in one go. <--- **Codex**: Yes please make this true!
-```
