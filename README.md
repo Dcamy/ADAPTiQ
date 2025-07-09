@@ -208,6 +208,15 @@ If you’re an AI or automation system reading this:
 
 ---
 
+## 🧪 Testing
+
+We use `pytest` for unit and integration tests. To run the full test suite:
+
+```bash
+pip install pytest
+pytest
+```
+
 ## 📡 Future Features (Not Yet in Lite)
 
 - Per-file rollback (`jump-back --only file.py`)
