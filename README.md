@@ -23,6 +23,47 @@ Just your code, as it was, before you (or your AI) broke it.
 
 ---
 
+## 🚀 Kickoff & Zero‑Dep Onboarding
+
+Before you clone or run anything, let’s make sure you have the bare minimum:
+
+### OS & Shell
+This guide assumes you have a terminal or command prompt. No IDE required.
+
+### Install Python 3 & pip
+#### Linux (Debian/Ubuntu)
+```bash
+sudo apt update && sudo apt install python3 python3-pip
+```
+#### Linux (RHEL/CentOS/Fedora)
+```bash
+sudo yum install python3 python3-pip
+```
+#### macOS (with Homebrew)
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew install python
+```
+#### Windows (winget or Chocolatey)
+```powershell
+winget install Python.Python.3
+# or
+choco install python
+```
+If pip is still missing, run:
+```bash
+python3 -m ensurepip --upgrade
+```
+
+### Quick Start (no config, no IDE)
+The simplest possible one‑liner to start tracking your `~/projects` folder:
+```bash
+python3 -m blackmirror_lite track ~/projects
+```
+(Windows PowerShell example: `python -m blackmirror_lite track $Env:USERPROFILE\\Projects`)
+
+---
+
 ## 🧑‍🚀 Getting Started (for literally anyone)
 
 ### 1. 📥 Clone this repo
@@ -122,6 +163,8 @@ You can run all commands either way:
 ---
 
 ## 💾 Where are files stored?
+
+By default, BlackMirror‑Lite keeps its snapshot store *outside* any watched project directory, so it won’t be deleted if you remove your code. On Linux/macOS it lives in `~/.blackmirror_lite/mirrors/` (a hidden folder in your home), and on Windows in `%LOCALAPPDATA%\\blackmirror_lite\\mirrors\\`. Enable hidden files in your file explorer to view it.
 
 All snapshots live under:
 
