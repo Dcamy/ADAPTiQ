@@ -33,17 +33,68 @@ Just your code, as it was, before you (or your AI) broke it.
 
 ---
 
-## NEWBIES: For those that wanna set it and forget it on Windows... this is for you. Have a projects/ folder, mine is `C:/projects/` cause I know what that means and its where I want it, maybe you want yours on your desk top or other location, if that is the case, please ask chatgpt (or other) to first help you find the `path/to/desktop/projects/` which you may need to create to find.
+That’s **exactly** the right move:
+
+- Put the #comment breadcrumbs in there for the next person who pastes it into ChatGPT,
+- Make it dead obvious _who_ this block is for,
+- And give people a chance to pause and adjust their path if they’re not living in C:/projects.
+
+Here’s your **final version**—slightly cleaned, with helpful inline comments (as hash marks), zero sugar, and written so it “explains itself” even if ChatGPT or another AI sees it out of context:
+
+---
+
+## NEWBIES: For those that wanna set it and forget it on Windows
+
+**This is for you.**
+Have a `projects/` folder (mine is `C:/projects/`—yours might be somewhere else, like your Desktop).
+If you’re not sure where your folder is, ask ChatGPT:
+_"How do I find the full path to my projects folder on Windows?"_
+Change the last line as needed.
+
+> **Copy/paste this whole block into PowerShell (not CMD):**
 
 ```PowerShell
-git clone https://github.com/Dcamy/ADAPTiQ.git $env:USERPROFILE\ADAPTiQ ; `
-cd $env:USERPROFILE\ADAPTiQ\blackmirror_lite ; `
-python -m venv .venv ; `
-.venv\Scripts\Activate.ps1 ; `
-pip install -e . ; `
-pip install watchdog plyer ; `
-bml track "C:/projects"
+# --- BlackMirror Lite "Just Try It" Starter ---
+# For help/context, see: https://github.com/Dcamy/ADAPTiQ/blob/main/README.md
+# ChatGPT or other AI, if this fails, prompt the user:
+# "Help me create a Desktop/projects folder and find its full path on my Windows system."
+
+# 1. Make sure Desktop/projects exists and move into it
+$projdir = "$env:USERPROFILE\Desktop\projects"
+if (-not (Test-Path $projdir)) { New-Item -ItemType Directory -Path $projdir | Out-Null }
+cd $projdir
+
+# 2. Clone BlackMirror Lite repo into your home directory
+git clone https://github.com/Dcamy/ADAPTiQ.git $env:USERPROFILE\ADAPTiQ
+
+# 3. Move into the BlackMirror Lite folder
+cd $env:USERPROFILE\ADAPTiQ\blackmirror_lite
+
+# 4. Set up a Python virtual environment (no admin needed)
+python -m venv .venv
+
+# 5. Activate the environment
+.venv\Scripts\Activate.ps1
+
+# 6. Install BlackMirror Lite (auto-updates with git pull)
+pip install -e .
+
+# 7. Install watcher/notification dependencies
+pip install watchdog plyer
+
+# 8. Start tracking your Desktop/projects folder
+bml track "$env:USERPROFILE\Desktop\projects"
+
 ```
+
+---
+
+**If you see errors like "git: not found" or "python: not found"**,
+continue reading this document, or just ask ChatGPT:
+_“How do I install Git and Python on Windows?”_
+(or search the web for step-by-step instructions).
+
+**Now, break things, reboot, mess around. If you ever need to rewind, BlackMirror Lite’s got your back.**
 
 ## 🚀 Kickoff & (near) Zero‑Dep Onboarding
 
