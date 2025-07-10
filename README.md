@@ -29,6 +29,7 @@ Just your code, as it was, before you (or your AI) broke it.
 - 🔐 **Safe by default**: `.git`, `.env`, and other sensitive files are always preserved on rollback
 - 🧃 **Zero IQ-friendly**: Just run it once — it auto-starts after reboot
 - 🧰 **One file, one install**: No services, no database, no dependencies beyond `watchdog`
+- 🚨 **Mirror-store size warning**: alerts when your snapshot store grows beyond the configured threshold (default 10 GB)
 - 🦺 **No Git. Ever. Lost.**: That’s the point.
 
 ---
@@ -266,13 +267,20 @@ It’s your own local time machine.
 
 ## ⏳ How does rollback work?
 
-You can jump back to any point in time:
+You can jump back to any point in time—and by default it only affects the current working directory:
 
 ```bash
+# Roll back this folder to how it was 2 hours ago
 bml jump-back 2h
+
+# Or target another directory or file directly:
+bml jump-back 2h /path/to/project
+
+# Limit rollback to specific files under that path:
+bml jump-back 2h /path/to/project --only main.py docs/*.md
 ```
 
-That will restore all tracked files to how they looked **2 hours ago**.
+If you omit the path, `bml jump-back` uses the current directory (which must be under a tracked folder). You can also restrict to individual files via `--only`.
 
 Want to protect additional files? ('.git' and '.env' are always preserved)
 

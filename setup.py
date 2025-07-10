@@ -21,6 +21,7 @@ setup(
     python_requires='>=3.6',
     install_requires=[
         'watchdog',
+        'plyer',
     ],
     entry_points={
         'console_scripts': [

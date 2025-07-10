@@ -7,6 +7,7 @@ import time
 import json
 import base64
 import re
+from fnmatch import fnmatch
 
 from .store import MirrorStore
 from .config import load_tracked
@@ -48,10 +49,29 @@ def jump_back(delta_seconds, keep_paths=None):
         # merge user-specified with defaults
         keep_paths = default_keeps + list(keep_paths)
 
-    bases = load_tracked()
-    if not bases:
+    tracked = load_tracked()
+    if not tracked:
         print("Error: no tracked folders configured.")
         sys.exit(1)
+
+    # Determine which tracked root(s) to apply rollback to
+    if target:
+        abs_target = os.path.abspath(target)
+        bases = [b for b in tracked if abs_target == b or abs_target.startswith(b + os.sep)]
+        if not bases:
+            print(f"Error: target '{target}' is not under any tracked folder.")
+            sys.exit(1)
+        rel_prefix = os.path.relpath(abs_target, bases[0])
+    else:
+        cwd = os.getcwd()
+        bases = [b for b in tracked if cwd == b or cwd.startswith(b + os.sep)]
+        if not bases:
+            print("Error: current directory not under any tracked folder. Please specify a path.")
+            sys.exit(1)
+        rel_prefix = None
+
+    # Normalize only patterns
+    only_patterns = only or []
 
     cutoff = time.time() - delta_seconds
     store_dir = MirrorStore._default_store_dir()
@@ -61,6 +81,18 @@ def jump_back(delta_seconds, keep_paths=None):
             continue
         safe_name = fname[:-6]
         rel_path = safe_name.replace('__', os.sep)
+
+        # Scope to rel_prefix if given
+        if rel_prefix:
+            if rel_path != rel_prefix and not rel_path.startswith(rel_prefix + os.sep):
+                continue
+            rel_path = rel_path[len(rel_prefix) + 1:]
+
+        # Apply --only filters if present
+        if only_patterns:
+            if not any(fnmatch(rel_path, pat) for pat in only_patterns):
+                continue
+
         # Skip paths user wants to keep
         if any(rel_path == kp or rel_path.startswith(kp.rstrip(os.sep) + os.sep)
                for kp in keep_paths):

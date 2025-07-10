@@ -5,9 +5,68 @@ import time
 import shutil
 import json
 import base64
-from .store import MirrorStore
+import urllib.request
+from .store import MirrorStore, parse_size
 from .config import load_tracked, add_tracked, remove_tracked, _config_dir
 from .rollback import jump_back
+from . import __version__
+try:
+    from plyer import notification
+except ImportError:
+    notification = None
+
+def _warn_store_size():
+    """Warn if the mirror store size exceeds the configured threshold."""
+    # Default threshold, override via BML_STORE_WARNING_THRESHOLD (e.g. '5G', '500M')
+    threshold_str = os.environ.get('BML_STORE_WARNING_THRESHOLD', '10G')
+    try:
+        threshold = parse_size(threshold_str)
+    except ValueError:
+        threshold = 10 * 1024**3
+        threshold_str = '10G'
+    store_dir = MirrorStore._default_store_dir()
+    total = 0
+    for root, dirs, files in os.walk(store_dir):
+        for fname in files:
+            try:
+                total += os.path.getsize(os.path.join(root, fname))
+            except Exception:
+                pass
+    if total > threshold:
+        print(
+            f"⚠️ Mirror store >{threshold_str}. "
+            f"Consider running `bml prune --max-size {threshold_str}` or tighten your `.bmlignore`."
+        )
+
+def check_update():
+    """Check PyPI for a newer release and notify via console and desktop."""
+    local_ver = __version__
+    remote_ver = None
+    # Query PyPI JSON API for latest version
+    try:
+        with urllib.request.urlopen(
+            "https://pypi.org/pypi/blackmirror_lite/json"
+        ) as resp:
+            data = json.load(resp)
+            remote_ver = data.get('info', {}).get('version')
+    except Exception as e:
+        print(f"Could not fetch version info from PyPI: {e}")
+    if remote_ver:
+        if remote_ver != local_ver:
+            msg = f"Update available: {local_ver} → {remote_ver}"
+            print(msg)
+            # Determine updater command (pip or pipx)
+            if 'site-packages' in __file__:
+                cmd = 'pip install --upgrade blackmirror_lite'
+            else:
+                cmd = 'pipx upgrade blackmirror-lite'
+            print(f"To update, run: {cmd}")
+            if notification:
+                notification.notify(title="BlackMirror Lite Update", message=msg)
+        else:
+            print(f"BlackMirror Lite is up to date (version {local_ver})")
+    else:
+        print("Unable to determine remote version.")
 
 """Command-line interface for BlackMirror Lite."""
 
@@ -65,7 +124,7 @@ def main():
     sub = parser.add_subparsers(dest="command")
 
     track = sub.add_parser("track", help="Start tracking a folder")
-    track.add_argument("path", help="Path to folder to track")
+    track.add_argument("path", help="Path to folder to track (or 'me' for current directory)")
 
     untrack = sub.add_parser("untrack", help="Stop tracking a folder")
     untrack.add_argument("path", help="Path to folder to untrack")
@@ -76,6 +135,18 @@ def main():
         help="Rollback to a time delta (e.g. '2h', '30m')",
     )
     jb.add_argument("delta", help="Time delta to jump back (e.g. 2h, 30m)")
+    jb.add_argument(
+        "path",
+        nargs="?",
+        default=None,
+        help="Optional path (folder or file) to rollback (defaults to current directory)",
+    )
+    jb.add_argument(
+        "--only",
+        nargs="+",
+        default=None,
+        help="Only rollback these relative file paths or glob patterns under the target",
+    )
     jb.add_argument(
         "--keep",
         nargs="+",
@@ -89,22 +160,39 @@ def main():
     )
     sub.add_parser("status", help="Show tracking status, mirror paths, recent actions")
     sub.add_parser("prove-it", help="Run a self-contained demo proving snapshot/rollback works")
+    sub.add_parser("update", help="Check for new versions and notify via desktop notification")
     pr = sub.add_parser("prune", help="Prune old snapshots by age or size")
     pr.add_argument("--keep-days", type=int, default=None, help="Retain only entries newer than DAYS days")
     pr.add_argument("--max-size", default=None, help="Prune oldest logs until total size <= SIZE (e.g. 100M, 2G)")
 
     args = parser.parse_args()
     mirror_dir = MirrorStore._default_store_dir()
-    if args.command != 'prove-it' and (not os.path.isdir(mirror_dir) or not os.listdir(mirror_dir)):
+    _warn_store_size()
+    # On first use, auto-run the demo once (but skip it for 'prove-it' or 'update')
+    if args.command not in ('prove-it', 'update') and (not os.path.isdir(mirror_dir) or not os.listdir(mirror_dir)):
         success = run_prove_it_demo()
         if not success:
             sys.exit(1)
     if args.command == "track":
-        from .config import add_tracked
-        # import watcher only when needed; avoids requiring watchdog for list/untrack
+        from .config import add_tracked, load_tracked
         from .watcher import start_watch
 
-        folder = add_tracked(args.path)
+        # Interpret 'me' as current working directory
+        target = args.path
+        if target == 'me':
+            target = os.getcwd()
+        folder = os.path.abspath(target)
+        # Guard against nested tracking
+        existing = load_tracked()
+        for root in existing:
+            if folder.startswith(root + os.sep):
+                print(f"Error: '{folder}' is already under tracked folder '{root}'")
+                sys.exit(1)
+            if root.startswith(folder + os.sep):
+                print(f"Error: tracked folder '{root}' is nested under '{folder}'")
+                sys.exit(1)
+
+        folder = add_tracked(folder)
         print(f"Tracking: {folder}")
         start_watch(folder)
 
@@ -132,7 +220,10 @@ def main():
             secs = parse_timedelta(args.delta)
         except ValueError as e:
             parser.error(str(e))
-        jump_back(secs, args.keep)
+        try:
+            jump_back(secs, args.keep, target=args.path, only=args.only)
+        except Exception as e:
+            parser.error(str(e))
 
     elif args.command == "watch":
         from .watcher import MirrorEventHandler
@@ -161,6 +252,8 @@ def main():
         from .autostart import install_autostart
 
         install_autostart()
+    elif args.command == "update":
+        check_update()
 
     elif args.command == "status":
         store = MirrorStore()

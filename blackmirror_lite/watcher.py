@@ -66,6 +66,8 @@ class MirrorEventHandler(FileSystemEventHandler):
         logger.info(f"{event.event_type.title()}: {rel_path}")
 
 
+
+
 def start_watch(path):
     """
     Start monitoring the given directory path for changes.
