@@ -33,7 +33,19 @@ Just your code, as it was, before you (or your AI) broke it.
 
 ---
 
-## 🚀 Kickoff & Zero‑Dep Onboarding
+## NEWBIES: For those that wanna set it and forget it on Windows... this is for you. Have a projects/ folder, mine is `C:/projects/` cause I know what that means and its where I want it, maybe you want yours on your desk top or other location, if that is the case, please ask chatgpt (or other) to first help you find the `path/to/desktop/projects/` which you may need to create to find.
+
+```PowerShell
+git clone https://github.com/Dcamy/ADAPTiQ.git $env:USERPROFILE\ADAPTiQ ; `
+cd $env:USERPROFILE\ADAPTiQ\blackmirror_lite ; `
+python -m venv .venv ; `
+.venv\Scripts\Activate.ps1 ; `
+pip install -e . ; `
+pip install watchdog plyer ; `
+bml track "C:/projects"
+```
+
+## 🚀 Kickoff & (near) Zero‑Dep Onboarding
 
 Before you clone or run anything, let’s make sure you have the bare minimum:
 
@@ -243,7 +255,7 @@ pytest
 
 ## 📡 Future Features (Not Yet in Lite)
 
-- Per-file rollback (`jump-back --only file.py`)
+- Per‑file rollback (`jump-back --only file.py`)
 - Compression/diff modes for power users
 - Obsidian plugin, VS Code integration, GraphRAG-aware metadata
 
@@ -257,6 +269,19 @@ pytest
 - Anyone who’s lost work and **never wants that pain again**
 
 ---
+
+## 📉 Pruning & Ignoring files
+
+To prevent unbounded disk growth, BlackMirror Lite now supports:
+
+- **Ignore patterns**: add a `.bmlignore` file in your tracked folder with glob patterns (one per line) to skip snapshotting matching paths (comments with `#` allowed).
+- **Pruning**: age-based or size-based cleanup of your mirror store:
+  ```bash
+  bml prune --keep-days 7      # drop snapshots older than 7 days
+  bml prune --max-size 5G      # keep total store size under 5 GiB
+  ```
+
+These tools let you control which files are logged and how long snapshots are retained.
 
 ## 🧠 Philosophy
 

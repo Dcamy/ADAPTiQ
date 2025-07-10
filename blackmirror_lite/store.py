@@ -60,3 +60,86 @@ class MirrorStore:
             entry["content_b64"] = base64.b64encode(content_bytes).decode("ascii")
         with open(log_path, "a", encoding="utf-8") as logf:
             logf.write(json.dumps(entry) + "\n")
+
+    def prune(self, keep_days=None, max_size=None):
+        """
+        Prune snapshot logs by age (keep_days) and/or total size (max_size).
+
+        keep_days: retain entries newer than this many days.
+        max_size: prune oldest files until total store size <= max_size (bytes or human suffix).
+        """
+        # Age-based pruning
+        if keep_days is not None:
+            cutoff = time.time() - (keep_days * 86400)
+            for fname in os.listdir(self.root):
+                if not fname.endswith('.jsonl'):
+                    continue
+                path = os.path.join(self.root, fname)
+                kept = []
+                try:
+                    with open(path, 'r', encoding='utf-8') as f:
+                        for line in f:
+                            entry = json.loads(line)
+                            if entry.get('timestamp', 0) >= cutoff:
+                                kept.append(entry)
+                except Exception:
+                    continue
+                if kept:
+                    tmp = path + '.tmp'
+                    with open(tmp, 'w', encoding='utf-8') as tf:
+                        for entry in kept:
+                            tf.write(json.dumps(entry) + "\n")
+                    os.replace(tmp, path)
+                else:
+                    try:
+                        os.remove(path)
+                    except Exception:
+                        pass
+
+        # Size-based pruning
+        if max_size is not None:
+            # Allow human-friendly sizes
+            if isinstance(max_size, str):
+                max_size = parse_size(max_size)
+            files = []
+            total = 0
+            for fname in os.listdir(self.root):
+                if not fname.endswith('.jsonl'):
+                    continue
+                path = os.path.join(self.root, fname)
+                try:
+                    st = os.stat(path)
+                except Exception:
+                    continue
+                files.append((st.st_mtime, path, st.st_size))
+                total += st.st_size
+            files.sort(key=lambda x: x[0])
+            for _, path, size in files:
+                if total <= max_size:
+                    break
+                try:
+                    os.remove(path)
+                    total -= size
+                except Exception:
+                    pass
+
+def parse_size(size_str):
+    """
+    Parse a human-friendly size string (e.g. '100M', '2G') into bytes.
+    """
+    m = __import__('re').match(r'^(\d+)([KMGTP])?$', size_str.strip(), __import__('re').IGNORECASE)
+    if not m:
+        raise ValueError(f"Invalid size: {size_str}")
+    val = int(m.group(1))
+    unit = (m.group(2) or '').upper()
+    if unit == 'K':
+        return val * 1024
+    if unit == 'M':
+        return val * 1024**2
+    if unit == 'G':
+        return val * 1024**3
+    if unit == 'T':
+        return val * 1024**4
+    if unit == 'P':
+        return val * 1024**5
+    return val
