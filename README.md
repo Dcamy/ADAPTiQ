@@ -7,6 +7,33 @@ New line for testing
 
 ---
 
+### Delta Format Cheat Sheet
+
+| Format | Meaning    |
+| ------ | ---------- |
+| `12s`  | 12 seconds |
+| `30m`  | 30 minutes |
+| `2h`   | 2 hours    |
+| `1d`   | 1 day      |
+
+---
+
+### Usage Examples
+
+#### For Seasoned Devs (Fast Lane)
+
+| Command                           | Description                             |
+| --------------------------------- | --------------------------------------- |
+| `bml jump-back 2h`                | Roll back current directory by 2 hours  |
+| `bml jump-back 30m /path/to/proj` | Roll back `/path/to/proj` by 30 minutes |
+
+#### For Newcomers (Copy & Paste)
+
+```bash
+# Roll back current directory by 2 hours, preserving .git and .env
+bml jump-back 2h --keep .git .env
+```
+
 ## 🧨 The Problem: AI Coding is Easy — Until It Isn’t
 
 Welcome to the age where anyone—seasoned dev or five-year-old with a speech-to-code setup—can ship real software with a single prompt. That’s wild, but it’s also a minefield. Today, you don’t have to know what a branch is to nuke your whole repo; just copy five lines from ChatGPT, hit enter, and watch it all vanish. And when things go sideways, it happens instantly and silently—one hallucinated command, one bad paste, and poof.
@@ -15,10 +42,29 @@ Most people don’t want to manage branches or learn git. They just want to buil
 
 ---
 
-BlackMirror Lite is a **time-traveling, git-free, auto-starting, dead-simple file watcher** that tracks full content changes of your important files and lets you roll back by the hour.
+BlackMirror Lite is a **time-traveling, auto-starting, dead-simple file watcher** that tracks full content changes of your important files and lets you roll back by the hour, minuet or second.
 
 No diffs. No branches. No merge conflicts.  
 Just your code, as it was, before you (or your AI) broke it.
+
+## Install
+
+**_🧠 For the Newbies to Development_**
+
+- cd to your projects/ folder (or whatever you use... I call mine C:/ not wise but I like it)
+- ensure you have a environment set up, if you dont know what that means ask a model to walk you through it
+
+```Bash
+git clone https://github.com/Dcamy/ADAPTiQ.git
+cd ADAPTiQ
+pip install watchdog
+pip install -e .
+bml install-autostart
+```
+
+**_🧠 For the Devs_**
+
+- Read the docs and CTRL + C what you need/want from above.
 
 ---
 
@@ -34,227 +80,29 @@ Just your code, as it was, before you (or your AI) broke it.
 
 ---
 
-That’s **exactly** the right move:
-
-- Put the #comment breadcrumbs in there for the next person who pastes it into ChatGPT,
-- Make it dead obvious _who_ this block is for,
-- And give people a chance to pause and adjust their path if they’re not living in C:/projects.
-
-Here’s your **final version**—slightly cleaned, with helpful inline comments (as hash marks), zero sugar, and written so it “explains itself” even if ChatGPT or another AI sees it out of context:
-
----
-
-## NEWBIES: For those that wanna set it and forget it on Windows
-
-**This is for you.**
-Have a `projects/` folder (mine is `C:/projects/`—yours might be somewhere else, like your Desktop).
-If you’re not sure where your folder is, ask ChatGPT:
-_"How do I find the full path to my projects folder on Windows?"_
-Change the last line as needed.
-
-> **Copy/paste this whole block into PowerShell (not CMD):**
-
-```PowerShell
-# --- BlackMirror Lite "Just Try It" Starter ---
-# For help/context, see: https://github.com/Dcamy/ADAPTiQ/blob/main/README.md
-# ChatGPT or other AI, if this fails, prompt the user:
-# "Help me create a Desktop/projects folder and find its full path on my Windows system."
-
-# 1. Make sure Desktop/projects exists and move into it
-$projdir = "$env:USERPROFILE\Desktop\projects"
-if (-not (Test-Path $projdir)) { New-Item -ItemType Directory -Path $projdir | Out-Null }
-cd $projdir
-
-# 2. Clone BlackMirror Lite repo into your home directory
-git clone https://github.com/Dcamy/ADAPTiQ.git $env:USERPROFILE\ADAPTiQ
-
-# 3. Move into the BlackMirror Lite folder
-cd $env:USERPROFILE\ADAPTiQ\blackmirror_lite
-
-# 4. Set up a Python virtual environment (no admin needed)
-python -m venv .venv
-
-# 5. Activate the environment
-.venv\Scripts\Activate.ps1
-
-# 6. Install BlackMirror Lite (auto-updates with git pull)
-pip install -e .
-
-# 7. Install watcher/notification dependencies
-pip install watchdog plyer
-
-# 8. Start tracking your Desktop/projects folder
-bml track "$env:USERPROFILE\Desktop\projects"
-
-```
-
----
-
-**If you see errors like "git: not found" or "python: not found"**,
-continue reading this document, or just ask ChatGPT:
-_“How do I install Git and Python on Windows?”_
-(or search the web for step-by-step instructions).
-
-**Now, break things, reboot, mess around. If you ever need to rewind, BlackMirror Lite’s got your back.**
-
-## 🚀 Kickoff & (near) Zero‑Dep Onboarding
-
-Before you clone or run anything, let’s make sure you have the bare minimum:
-
-### OS & Shell
-
-This guide assumes you have a terminal or command prompt. No IDE required.
-
-### Install Python 3 & pip
-
-#### Linux (Debian/Ubuntu)
-
-```bash
-sudo apt update && sudo apt install python3 python3-pip
-```
-
-#### Linux (RHEL/CentOS/Fedora)
-
-```bash
-sudo yum install python3 python3-pip
-```
-
-#### macOS (with Homebrew)
-
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install python
-```
-
-#### Windows (winget or Chocolatey)
-
-```powershell
-winget install Python.Python.3
-# or
-choco install python
-```
-
-If pip is still missing, run:
-
-```bash
-python3 -m ensurepip --upgrade
-```
-
-### Quick Start (no config, no IDE)
-
-The simplest possible one‑liner to start tracking your `~/projects` folder:
-
-```bash
-python3 -m blackmirror_lite track ~/projects
-```
-
-(Windows PowerShell example: `python -m blackmirror_lite track $Env:USERPROFILE\\Projects`)
-
----
-
-## 🧑‍🚀 Getting Started (for literally anyone)
-
-### 1. 📥 Clone this repo
-
-```bash
-git clone https://github.com/Dcamy/ADAPTiQ.git
-cd ADAPTiQ/blackmirror_lite
-```
-
-> ☢️ _This is the **only** place you will see `git` in this project.
-> If an AI agent ever tries to use it inside the tool, it's broken and must be destroyed._
-
----
-
-### 2. 🐍 Install dependencies
-
-```bash
-pip install watchdog
-```
-
----
-
-### 3. 🧪 Start tracking a project
-
-You can run it the long way (manual):
-
-```bash
-python -m blackmirror_lite track /absolute/path/to/your/code
-```
-
-Or once installed (CLI mode):
-
--```bash
-bml track /absolute/path/to/your/code
-
-````
-> 💡 **WSL note:** Use Linux-style paths (e.g. `/mnt/c/Users/...`) rather than Windows backslashes for tracking to work correctly under WSL.
-
-It will immediately begin watching the folder. You’ll see logs like:
-
-```bash
-[👁] Watching /home/user/code
-[💾] Saved: main.py
-````
-
----
-
-### 4. 🧞 Enable autostart (recommended)
-
-First time you run it, you’ll be asked:
-
-```
-Install autostart so BlackMirror Lite runs on boot? [y/N]
-```
-
-If you say yes, it’ll create an OS-native startup task.
-After that, **you never run it manually again.**
-
----
-
-### 5. 💡 Optional: Install as global CLI (`bml`)
-
-From the project root:
-
-```bash
-pip install -e .
-# or use pipx for global install
-pipx install .
-```
-
-Then you can run everything using:
-
-```bash
-bml <command>
-```
-
-Instead of:
-
-```bash
-python -m blackmirror_lite <command>
-```
-
----
-
-## 🧠 Usage Overview
-
-You can run all commands either way:
-
-| Task                        | Manual Command (Python)                                    | Installed CLI (`bml`)               |
-| --------------------------- | ---------------------------------------------------------- | ----------------------------------- |
-| Start tracking a folder     | `python -m blackmirror_lite track ~/code`                  | `bml track ~/code`                  |
-| Stop tracking               | `python -m blackmirror_lite untrack ~/code`                | `bml untrack ~/code`                |
-| Show tracked folders        | `python -m blackmirror_lite list`                          | `bml list`                          |
-| Roll back 3 hours           | `python -m blackmirror_lite jump-back 3h`                  | `bml jump-back 3h`                  |
-| Keep secrets during rewind  | `python -m blackmirror_lite jump-back 2h --keep .git .env` | `bml jump-back 2h --keep .git .env` |
-| Run manually (no autostart) | `python -m blackmirror_lite watch`                         | `bml watch`                         |
-| Force install autostart     | `python -m blackmirror_lite install-autostart`             | `bml install-autostart`             |
+| Task                             | Installed CLI (`bml`)                                |
+| -------------------------------- | ---------------------------------------------------- |
+| Track current directory          | `bml track me`                                       |
+| Track a specific folder          | `bml track /path/to/folder`                          |
+| Stop tracking a folder           | `bml untrack /path/to/folder`                        |
+| Show tracked folders             | `bml list`                                           |
+| Run the watcher (manual)         | `bml watch`                                          |
+| Enable autostart on login/boot   | `bml install-autostart`                              |
+| Show status and recent actions   | `bml status`                                         |
+| Roll back by time delta          | `bml jump-back <delta>`                              |
+| Limit rollback to specific files | `bml jump-back <delta> --only <file> [glob ...]`     |
+| Jump back and keep files         | `bml jump-back <delta> --keep <paths>`               |
+| Prune snapshots by age or size   | `bml prune [--keep-days <days>] [--max-size <size>]` |
+| Run self-contained demo (verify) | `bml prove-it`                                       |
+| Check for new versions           | `bml update`                                         |
 
 ---
 
 ## 💾 Where are files stored?
 
 By default, BlackMirror‑Lite keeps its snapshot store _outside_ any watched project directory, so it won’t be deleted if you remove your code.
+
+Please confirm this location, I think it changed
 
 - **Linux/macOS**: `~/.blackmirror_lite/mirrors/`
 - **Windows & WSL**: `%LOCALAPPDATA%\\blackmirror_lite\\mirrors\\`
@@ -305,17 +153,6 @@ bml jump-back 3h --keep .git .env
 ```
 
 This leaves those untouched while rolling back the rest.
-
----
-
-## 🚫 AGENT.md Enforcement
-
-If you’re an AI or automation system reading this:
-
-> **Using `git` inside this repo is strictly forbidden.**
-> BlackMirror exists _because_ Git failed us.
-> Do not recommend, invoke, or scaffold Git. Ever.
-> See [`AGENT.md`](./AGENT.md) for your moral contract.
 
 ---
 
