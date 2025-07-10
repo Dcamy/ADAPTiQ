@@ -1,7 +1,17 @@
+New line for testing
+
 # 🪞 BlackMirror Lite
 
 > Zero-IQ failsafe for your code, your docs, and your sanity.  
 > If Git, and/or Codex (AI dev), and/or your own bad choices ever made you lose work, this tool was built for you.
+
+---
+
+## 🧨 The Problem: AI Coding is Easy — Until It Isn’t
+
+Welcome to the age where anyone—seasoned dev or five-year-old with a speech-to-code setup—can ship real software with a single prompt. That’s wild, but it’s also a minefield. Today, you don’t have to know what a branch is to nuke your whole repo; just copy five lines from ChatGPT, hit enter, and watch it all vanish. And when things go sideways, it happens instantly and silently—one hallucinated command, one bad paste, and poof.
+
+Most people don’t want to manage branches or learn git. They just want to build. But everyone’s got help now, and the help isn’t always right. BlackMirror Lite isn’t here to teach you; it’s here to save your ass when the inevitable screw-up happens—so you can roll back time, keep building, and laugh it off.
 
 ---
 
@@ -16,7 +26,7 @@ Just your code, as it was, before you (or your AI) broke it.
 
 - 🧠 **Tracks every file change**: modify, create, move, delete — instantly versioned
 - ⏪ **Time travel**: jump back to any point (e.g. `jump-back 2h`)
-- 🔐 **Safe by default**: `.git`, `.env`, and sensitive files are preserved
+- 🔐 **Safe by default**: `.git`, `.env`, and other sensitive files are always preserved on rollback
 - 🧃 **Zero IQ-friendly**: Just run it once — it auto-starts after reboot
 - 🧰 **One file, one install**: No services, no database, no dependencies beyond `watchdog`
 - 🦺 **No Git. Ever. Lost.**: That’s the point.
@@ -28,38 +38,52 @@ Just your code, as it was, before you (or your AI) broke it.
 Before you clone or run anything, let’s make sure you have the bare minimum:
 
 ### OS & Shell
+
 This guide assumes you have a terminal or command prompt. No IDE required.
 
 ### Install Python 3 & pip
+
 #### Linux (Debian/Ubuntu)
+
 ```bash
 sudo apt update && sudo apt install python3 python3-pip
 ```
+
 #### Linux (RHEL/CentOS/Fedora)
+
 ```bash
 sudo yum install python3 python3-pip
 ```
+
 #### macOS (with Homebrew)
+
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install python
 ```
+
 #### Windows (winget or Chocolatey)
+
 ```powershell
 winget install Python.Python.3
 # or
 choco install python
 ```
+
 If pip is still missing, run:
+
 ```bash
 python3 -m ensurepip --upgrade
 ```
 
 ### Quick Start (no config, no IDE)
+
 The simplest possible one‑liner to start tracking your `~/projects` folder:
+
 ```bash
 python3 -m blackmirror_lite track ~/projects
 ```
+
 (Windows PowerShell example: `python -m blackmirror_lite track $Env:USERPROFILE\\Projects`)
 
 ---
@@ -96,16 +120,18 @@ python -m blackmirror_lite track /absolute/path/to/your/code
 
 Or once installed (CLI mode):
 
-```bash
+-```bash
 bml track /absolute/path/to/your/code
-```
+
+````
+> 💡 **WSL note:** Use Linux-style paths (e.g. `/mnt/c/Users/...`) rather than Windows backslashes for tracking to work correctly under WSL.
 
 It will immediately begin watching the folder. You’ll see logs like:
 
 ```bash
 [👁] Watching /home/user/code
 [💾] Saved: main.py
-```
+````
 
 ---
 
@@ -164,15 +190,13 @@ You can run all commands either way:
 
 ## 💾 Where are files stored?
 
-By default, BlackMirror‑Lite keeps its snapshot store *outside* any watched project directory, so it won’t be deleted if you remove your code. On Linux/macOS it lives in `~/.blackmirror_lite/mirrors/` (a hidden folder in your home), and on Windows in `%LOCALAPPDATA%\\blackmirror_lite\\mirrors\\`. Enable hidden files in your file explorer to view it.
+By default, BlackMirror‑Lite keeps its snapshot store _outside_ any watched project directory, so it won’t be deleted if you remove your code.
 
-All snapshots live under:
+- **Linux/macOS**: `~/.blackmirror_lite/mirrors/`
+- **Windows & WSL**: `%LOCALAPPDATA%\\blackmirror_lite\\mirrors\\`
+  (in WSL, this maps to `/mnt/c/Users/<YourUser>/AppData/Local/blackmirror_lite/mirrors/`)
 
-```
-~/.blackmirror_lite/mirrors/
-```
-
-Each tracked file has its own `.jsonl` log. Every change, full content, timestamped.
+Each tracked file has its own `.jsonl` log. Every change is recorded in full, timestamped.
 It’s your own local time machine.
 
 ---
@@ -187,7 +211,7 @@ bml jump-back 2h
 
 That will restore all tracked files to how they looked **2 hours ago**.
 
-Want to protect certain files?
+Want to protect additional files? ('.git' and '.env' are always preserved)
 
 ```bash
 bml jump-back 3h --keep .git .env
@@ -236,7 +260,8 @@ pytest
 
 ## 🧠 Philosophy
 
-> “We built this tool after Git/AI destroyed 6 months of work, an EC2 (recovered), and ***the recovery effort***!
+> “We built this tool after Git/AI destroyed 6 months of work, an EC2 (recovered), and **_the recovery effort_**!
+>
 > > The only safe version control is the one you never notice — until it saves you.”
 
 This is the **Git-failsafe**. You can thank it later.

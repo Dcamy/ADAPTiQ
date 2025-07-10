@@ -27,7 +27,7 @@ def main():
         "--keep",
         nargs="+",
         default=[],
-        help="Relative paths to leave untouched",
+        help="Relative paths to leave untouched ('.git' and '.env' are always preserved)",
     )
     sub.add_parser("watch", help="Run watcher manually for all tracked folders")
     sub.add_parser(

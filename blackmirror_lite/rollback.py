@@ -40,8 +40,13 @@ def jump_back(delta_seconds, keep_paths=None):
 
     keep_paths: iterable of relative path prefixes to leave untouched.
     """
+    # Always preserve .git and .env by default
+    default_keeps = ['.git', '.env']
     if keep_paths is None:
-        keep_paths = []
+        keep_paths = default_keeps.copy()
+    else:
+        # merge user-specified with defaults
+        keep_paths = default_keeps + list(keep_paths)
 
     bases = load_tracked()
     if not bases:
