@@ -36,9 +36,42 @@ class MirrorEventHandler(FileSystemEventHandler):
                 pass
 
     def on_any_event(self, event):
-        # Ignore directory events and apply ignore patterns
+        # Ignore directory events
         if event.is_directory:
             return
+
+        # Handle file moves/renames as delete+create
+        if event.event_type == 'moved' and hasattr(event, 'dest_path'):
+            try:
+                old_rel = os.path.relpath(event.src_path, self.base_path)
+                new_rel = os.path.relpath(event.dest_path, self.base_path)
+            except ValueError:
+                return
+            # Ignore patterns for both old and new
+            for pat in self.ignore_patterns:
+                if fnmatch(old_rel, pat) or old_rel.startswith(pat.rstrip(os.sep) + os.sep):
+                    return
+                if fnmatch(new_rel, pat) or new_rel.startswith(pat.rstrip(os.sep) + os.sep):
+                    return
+            # Record deletion of old name
+            self.store.record(old_rel, 'deleted', None)
+            logger.info(f"Deleted: {old_rel}")
+            # Record creation under new name with content
+            content = None
+            try:
+                size = os.path.getsize(event.dest_path)
+                if size <= 100 * 1024 * 1024:
+                    with open(event.dest_path, 'rb') as f:
+                        content = f.read()
+                else:
+                    logger.warning(f"Ignoring large file on move: {new_rel} ({size} bytes)")
+            except Exception:
+                content = None
+            self.store.record(new_rel, 'created', content)
+            logger.info(f"Created: {new_rel}")
+            return
+
+        # Ignore patterns and get relative path
         try:
             rel_path = os.path.relpath(event.src_path, self.base_path)
         except ValueError:
@@ -52,7 +85,6 @@ class MirrorEventHandler(FileSystemEventHandler):
         if event.event_type in ("created", "modified"):
             try:
                 size = os.path.getsize(event.src_path)
-                # Skip files larger than threshold (100MB)
                 if size > 100 * 1024 * 1024:
                     logger.warning(f"Ignoring large file: {rel_path} ({size} bytes)")
                     return
@@ -61,7 +93,7 @@ class MirrorEventHandler(FileSystemEventHandler):
             except Exception:
                 content = None
 
-        # Record the snapshot
+        # Record the snapshot for other events
         self.store.record(rel_path, event.event_type, content)
         logger.info(f"{event.event_type.title()}: {rel_path}")
 

@@ -15,7 +15,8 @@ def test_record_appends_jsonl(tmp_path, monkeypatch):
     store.record(rel, "modified", content)
 
     # JSONL file should be created with safe name
-    safe_name = rel.replace(os.sep, "__")
+    import urllib.parse
+    safe_name = urllib.parse.quote(rel, safe='')
     log_file = tmp_path / f"{safe_name}.jsonl"
     assert log_file.exists()
 

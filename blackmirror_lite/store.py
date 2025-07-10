@@ -3,6 +3,7 @@ import json
 import time
 import base64
 import platform
+import urllib.parse
 
 _WSL_PROC_PATH = "/proc/version"
 
@@ -48,9 +49,10 @@ class MirrorStore:
     def record(self, relative_path, event_type, content_bytes):
         """
         Append a JSON line for this change event. Content is base64-encoded if provided.
+        Uses URL-safe encoding of the relative path to avoid collisions.
         """
-        # Normalize filename for the log file
-        safe_name = relative_path.replace(os.sep, "__")
+        # Encode the path into a filesystem-safe, reversible string
+        safe_name = urllib.parse.quote(relative_path, safe='')
         log_path = os.path.join(self.root, safe_name + ".jsonl")
         entry = {
             "timestamp": time.time(),

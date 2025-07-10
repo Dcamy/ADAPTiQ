@@ -7,6 +7,7 @@ import json
 import base64
 import urllib.request
 from .store import MirrorStore, parse_size
+import urllib.parse
 from .config import load_tracked, add_tracked, remove_tracked, _config_dir
 from .rollback import jump_back
 from . import __version__
@@ -102,7 +103,8 @@ def run_prove_it_demo():
     write_and_record('print(2)\n')
     time.sleep(3)
     write_and_record('print(3)\n')
-    jump_back(3)
+    # Roll back the demo directory by 3 seconds to test snapshot/rollback
+    jump_back(3, target=demo_dir)
     remove_tracked(demo_dir)
     try:
         with open(demo_file, 'r', encoding='utf-8') as f:
@@ -174,7 +176,6 @@ def main():
         if not success:
             sys.exit(1)
     if args.command == "track":
-        from .config import add_tracked, load_tracked
         from .watcher import start_watch
 
         # Interpret 'me' as current working directory
@@ -197,8 +198,6 @@ def main():
         start_watch(folder)
 
     elif args.command == "untrack":
-        from .config import remove_tracked
-
         removed = remove_tracked(args.path)
         if removed:
             print(f"Untracked: {os.path.abspath(args.path)}")
@@ -269,7 +268,7 @@ def main():
                 if not fname.endswith('.jsonl'):
                     continue
                 safe = fname[:-6]
-                rel = safe.replace(os.sep, os.sep)
+                rel = urllib.parse.unquote(safe)
                 log_path = os.path.join(store.root, fname)
                 try:
                     last = None

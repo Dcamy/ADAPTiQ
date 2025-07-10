@@ -8,6 +8,7 @@ import json
 import base64
 import re
 from fnmatch import fnmatch
+import urllib.parse
 
 from .store import MirrorStore
 from .config import load_tracked
@@ -35,11 +36,15 @@ def parse_timedelta(delta_str):
     raise ValueError(f"Unknown time unit: {unit}")
 
 
-def jump_back(delta_seconds, keep_paths=None):
+def jump_back(delta_seconds, keep_paths=None, target=None, only=None):
     """
-    Restore all tracked folders to how they looked delta_seconds ago.
+    Restore tracked folders or a specific path to how they looked delta_seconds ago.
 
-    keep_paths: iterable of relative path prefixes to leave untouched.
+    Parameters:
+    - delta_seconds: number of seconds to roll back
+    - keep_paths: iterable of relative path prefixes to leave untouched
+    - target: optional path (folder or file) to roll back; defaults to current directory under tracked roots
+    - only: optional list of glob patterns or relative paths to limit rollback
     """
     # Always preserve .git and .env by default
     default_keeps = ['.git', '.env']
@@ -54,7 +59,7 @@ def jump_back(delta_seconds, keep_paths=None):
         print("Error: no tracked folders configured.")
         sys.exit(1)
 
-    # Determine which tracked root(s) to apply rollback to
+    # Determine which tracked root(s) to apply rollback to, and derive rel_prefix
     if target:
         abs_target = os.path.abspath(target)
         bases = [b for b in tracked if abs_target == b or abs_target.startswith(b + os.sep)]
@@ -62,6 +67,9 @@ def jump_back(delta_seconds, keep_paths=None):
             print(f"Error: target '{target}' is not under any tracked folder.")
             sys.exit(1)
         rel_prefix = os.path.relpath(abs_target, bases[0])
+        # If target equals the root, ignore prefix scoping
+        if rel_prefix in ('.', ''):
+            rel_prefix = None
     else:
         cwd = os.getcwd()
         bases = [b for b in tracked if cwd == b or cwd.startswith(b + os.sep)]
@@ -80,7 +88,7 @@ def jump_back(delta_seconds, keep_paths=None):
         if not fname.endswith('.jsonl'):
             continue
         safe_name = fname[:-6]
-        rel_path = safe_name.replace('__', os.sep)
+        rel_path = urllib.parse.unquote(safe_name)
 
         # Scope to rel_prefix if given
         if rel_prefix:
@@ -110,6 +118,7 @@ def jump_back(delta_seconds, keep_paths=None):
             continue
 
         # Apply rollback
+
         for base in bases:
             target = os.path.join(base, rel_path)
 

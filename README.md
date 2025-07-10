@@ -258,6 +258,22 @@ By default, BlackMirror‑Lite keeps its snapshot store _outside_ any watched pr
 
 - **Linux/macOS**: `~/.blackmirror_lite/mirrors/`
 - **Windows & WSL**: `%LOCALAPPDATA%\\blackmirror_lite\\mirrors\\`
+
+---
+
+## 📝 Known issues & TODO
+
+Before recommending BlackMirror Lite for general use, consider tackling these important hardening tasks. Community PRs welcome!
+
+- **Improve log filename encoding** to avoid collisions and handle special characters instead of the current `__` replacement.
+- **Harden rollback deletion logic**: only delete when a prior snapshot exists and offer a `--dry-run` preview mode.
+- **Support file moves/renames** in the watcher so history continuity is preserved.
+- **Embed schema and tool version metadata** in each JSONL snapshot entry for future-proof migrations.
+- **Add a non-interactive flag** (e.g. `--yes`) to `bml install-autostart` to support headless or scripted installs.
+- **Extend `bml update` for Git clones**: detect local Git checkouts and suggest `git pull` when upstream differs.
+- **Debounce or dedupe identical snapshots** generated in rapid succession to reduce log bloat.
+- **Provide a `bml verify` command** to detect and repair corrupted, orphaned, or inconsistent log files.
+
   (in WSL, this maps to `/mnt/c/Users/<YourUser>/AppData/Local/blackmirror_lite/mirrors/`)
 
 Each tracked file has its own `.jsonl` log. Every change is recorded in full, timestamped.
