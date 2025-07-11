@@ -286,7 +286,8 @@ def main():
                 continue
             store = MirrorStore(base)
             auto_bootstrap_ignore(base)
-            ingest_tree(base, store)
+            # Force initial snapshot for all unrecorded files
+            ingest_tree(base, store, force=True)
         print("Ingest complete.")
 
     elif args.command == "install-autostart":

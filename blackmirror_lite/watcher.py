@@ -98,8 +98,11 @@ def auto_bootstrap_ignore(base_path):
             logger.warning(f"Failed to write .bmlignore: {e}")
 
 
-def ingest_tree(base_path, store):
-    """Traverse base_path, snapshot existing files that have no prior entries."""
+def ingest_tree(base_path, store, force=False):
+    """Traverse base_path, snapshot existing files that have no prior entries.
+
+    If force=True, snapshot all files regardless of existing logs.
+    """
     patterns = load_ignore_patterns(base_path)
     for root, dirs, files in os.walk(base_path):
         rel_root = os.path.relpath(root, base_path)
@@ -129,7 +132,7 @@ def ingest_tree(base_path, store):
                 continue
             safe = urllib.parse.quote(rel_path, safe='')
             log_path = os.path.join(store.root, safe + '.jsonl')
-            if os.path.exists(log_path):
+            if not force and os.path.exists(log_path):
                 continue
             abs_path = os.path.join(base_path, rel_path)
             content = None

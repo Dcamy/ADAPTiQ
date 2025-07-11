@@ -39,10 +39,9 @@ class MirrorStore:
         # Use Windows local-appdata path on Windows or under WSL;
         # otherwise default to a hidden folder under the home directory (Linux/macOS).
         system = platform.system()
-        if system == "Windows" or (system == "Linux" and _is_wsl()):
+        if system == "Windows":
             local = os.environ.get("LOCALAPPDATA")
             if not local:
-                # Fallback for WSL if LOCALAPPDATA not inherited
                 try:
                     import getpass
 
@@ -51,7 +50,7 @@ class MirrorStore:
                 except Exception:
                     local = os.path.expanduser("~")
             return os.path.join(local, "blackmirror_lite", "mirrors")
-        # Linux/macOS default under home directory
+        # Linux, macOS, and WSL default under home directory
         return os.path.join(os.path.expanduser("~"), ".blackmirror_lite", "mirrors")
 
     def record(self, relative_path, event_type, content_bytes):
