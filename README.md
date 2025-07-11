@@ -54,11 +54,13 @@ Just your code, as it was, before you (or your AI) broke it.
 - cd to your projects/ folder (or whatever you use... I call mine C:/ not wise but I like it)
 - ensure you have a environment set up, if you dont know what that means ask a model to walk you through it
 
-```Bash
+```bash
 git clone https://github.com/Dcamy/ADAPTiQ.git
 cd ADAPTiQ
 pip install watchdog
 pip install -e .
+# Launch interactive autostart setup: choose shell, virtualenv (if any), and watcher command;
+# installs a cron job (Linux/macOS) or registry entry (Windows)
 bml install-autostart
 ```
 
@@ -186,7 +188,10 @@ pytest
 
 To prevent unbounded disk growth, BlackMirror Lite now supports:
 
-- **Ignore patterns**: add a `.bmlignore` file in your tracked folder with glob patterns (one per line) to skip snapshotting matching paths (comments with `#` allowed).
+- **Ignore patterns**: add a `.bmlignore` file in your tracked folder with glob patterns (one per line) to skip snapshotting matching paths (comments with `#` allowed). BlackMirror Lite also automatically scans and respects **all** `.gitignore` (and `.bmlignore`) files at any depth in your project tree, so nested sub‑project ignore rules apply to snapshots, too.
+
+Default built-in ignore patterns also skip common runtime/build directories:
+`env/`, `venv/`, `logs/`, `node_modules/`, in addition to `.git`, `.env`, and `.bmlignore`.
 - **Pruning**: age-based or size-based cleanup of your mirror store:
   ```bash
   bml prune --keep-days 7      # drop snapshots older than 7 days
@@ -194,6 +199,9 @@ To prevent unbounded disk growth, BlackMirror Lite now supports:
   ```
 
 These tools let you control which files are logged and how long snapshots are retained.
+
+Additional configuration via environment variables:
+- **Debounce interval** (`BML_DEBOUNCE_INTERVAL`): time in seconds to coalesce rapid create/modify events before snapshotting (default `0.5`; set to `0` for immediate recording).
 
 ## 🧠 Philosophy
 

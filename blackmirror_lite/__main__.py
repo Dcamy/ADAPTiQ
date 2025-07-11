@@ -87,6 +87,9 @@ def _event_icon(evt):
 
 def run_prove_it_demo():
     config_dir = _config_dir()
+    demo_sentinel = os.path.join(config_dir, '.demo_ran')
+    if os.path.exists(demo_sentinel):
+        return True
     demo_dir = os.path.join(config_dir, 'demo')
     shutil.rmtree(demo_dir, ignore_errors=True)
     os.makedirs(demo_dir)
@@ -103,7 +106,6 @@ def run_prove_it_demo():
     write_and_record('print(2)\n')
     time.sleep(3)
     write_and_record('print(3)\n')
-    # Roll back the demo directory by 3 seconds to test snapshot/rollback
     jump_back(3, target=demo_dir)
     remove_tracked(demo_dir)
     try:
@@ -113,6 +115,17 @@ def run_prove_it_demo():
         result = ''
     if result == 'print(2)':
         print('✅ BlackMirror works')
+        open(demo_sentinel, 'w').close()
+        for fname in os.listdir(store.root):
+            if not fname.endswith('.jsonl'):
+                continue
+            safe = fname[:-6]
+            rel = urllib.parse.unquote(safe)
+            if rel == 'demo.py':
+                try:
+                    os.remove(os.path.join(store.root, fname))
+                except Exception:
+                    pass
         return True
     print('❌ Well shit. You found an edge case. Open an issue and brag about it:')
     print('https://github.com/Dcamy/ADAPTiQ/issues')
@@ -156,6 +169,7 @@ def main():
         help="Relative paths to leave untouched ('.git' and '.env' are always preserved)",
     )
     sub.add_parser("watch", help="Run watcher manually for all tracked folders")
+    sub.add_parser("ingest", help="Snapshot unrecorded files for tracked folders")
     sub.add_parser(
         "install-autostart",
         help="Install autostart task so watcher runs on login/boot",
@@ -225,7 +239,7 @@ def main():
             parser.error(str(e))
 
     elif args.command == "watch":
-        from .watcher import MirrorEventHandler
+        from .watcher import MirrorEventHandler, auto_bootstrap_ignore, ingest_tree
         from watchdog.observers import Observer
 
         bases = load_tracked()
@@ -233,12 +247,23 @@ def main():
             print("No tracked folders configured. Use 'track' first.")
             sys.exit(1)
 
-        store = MirrorStore()
         observer = Observer()
+        any_watched = False
         for base in bases:
+            if not os.path.isdir(base):
+                print(f"Warning: not a directory: {base}. Skipping.")
+                continue
+            # Prepare per-root store, ingest and ignore patterns
+            store = MirrorStore(base)
+            auto_bootstrap_ignore(base)
+            ingest_tree(base, store)
             handler = MirrorEventHandler(store, base)
             observer.schedule(handler, base, recursive=True)
             print(f"Watching: {base}")
+            any_watched = True
+        if not any_watched:
+            print("No valid directories to watch. Exiting.")
+            sys.exit(1)
         observer.start()
         try:
             while True:
@@ -246,6 +271,23 @@ def main():
         except KeyboardInterrupt:
             observer.stop()
         observer.join()
+
+    elif args.command == "ingest":
+        from .watcher import ingest_tree, auto_bootstrap_ignore
+
+        bases = load_tracked()
+        if not bases:
+            print("No tracked folders configured. Use 'track' first.")
+            sys.exit(1)
+
+        for base in bases:
+            if not os.path.isdir(base):
+                print(f"Warning: not a directory: {base}. Skipping.")
+                continue
+            store = MirrorStore(base)
+            auto_bootstrap_ignore(base)
+            ingest_tree(base, store)
+        print("Ingest complete.")
 
     elif args.command == "install-autostart":
         from .autostart import install_autostart
@@ -255,13 +297,13 @@ def main():
         check_update()
 
     elif args.command == "status":
-        store = MirrorStore()
         roots = load_tracked()
         if not roots:
             print("No tracked folders.")
             sys.exit(1)
         for base in roots:
             print(f"Tracking: {base}")
+            store = MirrorStore(base)
             print(f"Backups: {store.root}")
             events = []
             for fname in os.listdir(store.root):

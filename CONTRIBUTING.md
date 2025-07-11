@@ -3,6 +3,7 @@
 Thank you for considering contributing to BlackMirror Lite! We welcome issues, pull requests, and suggestions.
 
 ## Getting Started
+
 1. Fork the repository and create your branch:
    ```bash
    git clone https://github.com/Dcamy/ADAPTiQ.git
@@ -24,11 +25,13 @@ Thank you for considering contributing to BlackMirror Lite! We welcome issues, p
 7. Push to your fork and open a pull request.
 
 ## Code Style
+
 - Follow existing Python style (PEP 8).
 - Keep changes focused and minimal.
 - Avoid unnecessary inline comments; strive for self-explanatory code.
 
 ## Reporting Issues
+
 Please open issues for bugs or feature requests at:
 https://github.com/Dcamy/ADAPTiQ/issues
 

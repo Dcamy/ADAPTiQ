@@ -21,9 +21,17 @@ def _is_wsl():
 class MirrorStore:
     """
     Handles writing file-change snapshots to a per-file JSONL log store.
+
+    If initialized with a root_key (e.g. a tracked folder path), snapshots
+    go into a subdirectory under the global mirror store, isolating each
+    tracked root.
     """
-    def __init__(self):
+    def __init__(self, root_key=None):
         self.root = self._default_store_dir()
+        if root_key:
+            # Create a per-root subdirectory to avoid cross-root collisions
+            safe = urllib.parse.quote(root_key, safe='')
+            self.root = os.path.join(self.root, safe)
         os.makedirs(self.root, exist_ok=True)
 
     @staticmethod

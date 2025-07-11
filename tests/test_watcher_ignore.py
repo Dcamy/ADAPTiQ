@@ -1,5 +1,8 @@
 import os
 from pathlib import Path
+import os
+# Disable debounce for watcher tests to get immediate recording
+os.environ.setdefault('BML_DEBOUNCE_INTERVAL', '0')
 
 import pytest
 from watchdog.events import FileSystemEvent
